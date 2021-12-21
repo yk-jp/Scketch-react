@@ -30,7 +30,7 @@ const config: webpack.Configuration = {
         files: "./src/**/*",
       },
     }),
-    new HtmlWebpackPlugin()
+    new HtmlWebpackPlugin({template: './src/index.html'})
   ],
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
