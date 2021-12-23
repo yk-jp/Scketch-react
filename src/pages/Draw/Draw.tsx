@@ -92,6 +92,8 @@ const Draw = () => {
   ) => {
     if (!drawingData.current) return;
     setLineColor(e.target.value);
+    // store data in session storage
+    sessionStorage.setItem('lineColor',e.target.value);
     drawingData.current.strokeStyle = e.target.value as string;
   };
 
