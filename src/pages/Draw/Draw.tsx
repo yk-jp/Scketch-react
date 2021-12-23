@@ -13,6 +13,8 @@ const Draw = () => {
     height: number;
   }>({ width: window.innerWidth, height: window.innerHeight });
 
+  // const [lineColor,setlineColor] = useState<string>("black");
+
   useEffect(() => {
     const resizeCanvas = async () => {
       if (!canvasRef.current) return;
@@ -26,6 +28,7 @@ const Draw = () => {
       const ctx: CanvasRenderingContext2D = canvas.getContext(
         "2d"
       ) as CanvasRenderingContext2D;
+      ctx.strokeStyle = "blue"
       drawingData.current = ctx as CanvasRenderingContext2D;
     };
 
@@ -57,12 +60,6 @@ const Draw = () => {
       coordinateX - baseCoordinateX,
       coordinateY - baseCoordinateY
     );
-    console.table({
-      baseCoordinateX,
-      coordinateX,
-      baseCoordinateY,
-      coordinateY,
-    });
     setIsPointerDown(true);
   };
 
@@ -88,9 +85,18 @@ const Draw = () => {
     drawingData.current.stroke();
   };
 
+  const changeLineColor = (
+    e:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLSelectElement>
+  ) => {
+
+    console.log(e.target.value);
+  };
+
   return (
     <div id="drawContainer">
-      <div className="h-100 d-flex justify-content-center align-items-center">
+      <div className="h-100 d-flex justify-content-center align-items-center flex-column">
         <main id="canvasSec">
           <canvas
             id="drawingArea"
@@ -101,6 +107,42 @@ const Draw = () => {
             onPointerMove={(e) => drawing(e)}
           ></canvas>
         </main>
+
+        <section id="ToolsForDrawing" className="mt-2">
+          <div id="lineColor">
+            <span>Change color for line</span>
+            <input
+              type="color"
+              className="colorPicker"
+              value="black"
+              onChange={(e) => {
+                changeLineColor(e);
+              }}
+            />
+            <select
+              onChange={(e) => {
+                changeLineColor(e);
+              }}
+            >
+              <option value="black">black</option>
+              <option value="red">red</option>
+              <option value="blue">blue</option>
+              <option value="green">green</option>
+              <option value="yellow">yellow</option>
+              <option value="gray">gray</option>
+              <option value="purple">purple</option>
+            </select>
+          </div>
+          <div id="lineWeight">
+            <span>Change weight for line</span>
+            <select>
+              <option value="volvo">Volvo</option>
+              <option value="saab">Saab</option>
+              <option value="mercedes">Mercedes</option>
+              <option value="audi">Audi</option>
+            </select>
+          </div>
+        </section>
       </div>
     </div>
   );

@@ -26,3 +26,14 @@
 .align-items-center {
     align-items: center;
 }
+
+.flex-column {
+    flex-direction: column;
+}
+
+
+/* margin */
+
+.mt-2 {
+    margin-top: 2em;
+}
