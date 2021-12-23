@@ -8,12 +8,7 @@ const Draw = () => {
   const drawingData = useRef<CanvasRenderingContext2D | null>(null);
   const [isPointerDown, setIsPointerDown] = useState<boolean>(false);
 
-  const [windowSize, setWindowSize] = useState<{
-    width: number;
-    height: number;
-  }>({ width: window.innerWidth, height: window.innerHeight });
-
-  // const [lineColor,setlineColor] = useState<string>("black");
+  const [lineColor, setLineColor] = useState<string>("#000000"); //Default color is black
 
   useEffect(() => {
     const resizeCanvas = async () => {
@@ -24,30 +19,35 @@ const Draw = () => {
     const initializeCanvas = async () => {
       const canvas: HTMLCanvasElement = canvasRef.current as HTMLCanvasElement;
       resizeCanvas(); //get canvas size
-      setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+
       const ctx: CanvasRenderingContext2D = canvas.getContext(
         "2d"
       ) as CanvasRenderingContext2D;
-      ctx.strokeStyle = "blue"
+      if (sessionStorage.getItem("lineColor")) {
+        ctx.strokeStyle = sessionStorage.getItem("lineColor") as string;
+        setLineColor(sessionStorage.getItem("lineColor") as string);
+      }
+
       drawingData.current = ctx as CanvasRenderingContext2D;
     };
 
     initializeCanvas();
+
     window.addEventListener("resize", () => {
-      resizeCanvas();
+      initializeCanvas();
     });
 
     return () => {
       // clean up
       window.removeEventListener("resize", () => {
-        resizeCanvas();
+        initializeCanvas();
       });
     };
   }, []);
 
   const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!drawingData.current) return;
-    console.log(windowSize);
+
     const baseCoordinateX: number = canvasRef.current?.getBoundingClientRect()
       .left as number;
     const baseCoordinateY: number = canvasRef.current?.getBoundingClientRect()
@@ -90,8 +90,9 @@ const Draw = () => {
       | React.ChangeEvent<HTMLInputElement>
       | React.ChangeEvent<HTMLSelectElement>
   ) => {
-
-    console.log(e.target.value);
+    if (!drawingData.current) return;
+    setLineColor(e.target.value);
+    drawingData.current.strokeStyle = e.target.value as string;
   };
 
   return (
@@ -114,24 +115,11 @@ const Draw = () => {
             <input
               type="color"
               className="colorPicker"
-              value="black"
+              value={lineColor}
               onChange={(e) => {
                 changeLineColor(e);
               }}
             />
-            <select
-              onChange={(e) => {
-                changeLineColor(e);
-              }}
-            >
-              <option value="black">black</option>
-              <option value="red">red</option>
-              <option value="blue">blue</option>
-              <option value="green">green</option>
-              <option value="yellow">yellow</option>
-              <option value="gray">gray</option>
-              <option value="purple">purple</option>
-            </select>
           </div>
           <div id="lineWeight">
             <span>Change weight for line</span>
