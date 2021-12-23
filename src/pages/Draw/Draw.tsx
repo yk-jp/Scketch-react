@@ -49,7 +49,7 @@ const Draw = () => {
       .left as number;
     const baseCoordinateY: number = canvasRef.current?.getBoundingClientRect()
       .top as number;
-    const coordinateX: number = e.screenX;
+    const coordinateX: number = e.clientX;
     const coordinateY: number = e.clientY;
     // start drawing
     drawingData.current.beginPath();
