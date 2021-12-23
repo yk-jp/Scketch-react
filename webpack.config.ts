@@ -1,7 +1,7 @@
 import * as path from "path";
-import  * as webpack from "webpack";
-import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
+import * as webpack from "webpack";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
+import HtmlWebpackPlugin from "html-webpack-plugin";
 
 const config: webpack.Configuration = {
   entry: "./src/index.tsx",
@@ -21,6 +21,16 @@ const config: webpack.Configuration = {
           },
         },
       },
+      {
+        test: /\.css$/i,
+        use: [
+          {
+            loader: "style-loader",
+            options: { injectType: "singletonStyleTag" },
+          },
+          "css-loader",
+        ],
+      },
     ],
   },
   plugins: [
@@ -30,7 +40,7 @@ const config: webpack.Configuration = {
         files: "./src/**/*",
       },
     }),
-    new HtmlWebpackPlugin({template: './src/index.html'})
+    new HtmlWebpackPlugin({ template: "./src/index.html" }),
   ],
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
