@@ -1,7 +1,10 @@
 import React from "react";
 
+// pages
+import Draw from "./pages/Draw/Draw";
+
 const App = () => {
-  return <h1>webpack test for react app with typescript</h1>;
+  return <Draw />;
 };
 
 export default App;
