@@ -19,6 +19,7 @@ const Draw = () => {
     };
     const initializeCanvas = async () => {
       const canvas: HTMLCanvasElement = canvasRef.current as HTMLCanvasElement;
+      
       resizeCanvas(); //get canvas size
 
       const ctx: CanvasRenderingContext2D = canvas.getContext(
@@ -30,9 +31,13 @@ const Draw = () => {
         setLineColor(sessionStorage.getItem("lineColor") as string);
       }
       // set lineWeight
-      if(sessionStorage.getItem("lineWeight")) { 
-        ctx.lineWidth = parseInt(sessionStorage.getItem("lineWeight") as string) as number;
-        setLineWeight(parseInt(sessionStorage.getItem("lineWeight") as string) as number);
+      if (sessionStorage.getItem("lineWeight")) {
+        ctx.lineWidth = parseInt(
+          sessionStorage.getItem("lineWeight") as string
+        ) as number;
+        setLineWeight(
+          parseInt(sessionStorage.getItem("lineWeight") as string) as number
+        );
       }
 
       drawingData.current = ctx as CanvasRenderingContext2D;
@@ -108,6 +113,11 @@ const Draw = () => {
     drawingData.current.lineWidth = parseInt(e.target.value) as number;
   };
 
+  const clearDrawing = () => {
+    if (!drawingData.current || !canvasRef.current) return;
+    drawingData.current.clearRect(0,0,canvasRef.current.width,canvasRef.current.height);
+  };
+
   return (
     <div id="drawContainer">
       <div className="h-100 d-flex justify-content-center align-items-center flex-column">
@@ -136,7 +146,19 @@ const Draw = () => {
           </div>
           <div id="lineWeight">
             <span>Change weight for line</span>
-           <input type="range" value={lineWeight} className="lineWeightPicker" onChange={(e) => { changeLineWeight(e) }} min="1" max="10"/>
+            <input
+              type="range"
+              value={lineWeight}
+              className="lineWeightPicker"
+              onChange={(e) => {
+                changeLineWeight(e);
+              }}
+              min="1"
+              max="10"
+            />
+          </div>
+          <div id="clearCanvas">
+            <button onClick={() => clearDrawing()}>clear</button>
           </div>
         </section>
       </div>
