@@ -146,7 +146,8 @@ const Draw = () => {
     doc.addImage(
       dataURI,
       "JPEG",
-      0,0,
+      0,
+      0,
       canvasRef.current.width,
       canvasRef.current.height
     );
