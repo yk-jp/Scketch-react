@@ -137,14 +137,14 @@ const Draw = () => {
 
   const downloadPDF = () => {
     if (!drawingData.current || !canvasRef.current) return;
-    // const dataURI: string = canvasRef.current.toDataURL("image/jpeg");
+    const dataURI: string = canvasRef.current.toDataURL();
     const doc = new jsPDF("l", "px", [
       canvasRef.current.width,
       canvasRef.current.height,
     ]);
 
     doc.addImage(
-      canvasRef.current,
+      dataURI,
       "JPEG",
       0,0,
       canvasRef.current.width,
