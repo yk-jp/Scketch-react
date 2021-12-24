@@ -9,6 +9,7 @@ const Draw = () => {
   const [isPointerDown, setIsPointerDown] = useState<boolean>(false);
 
   const [lineColor, setLineColor] = useState<string>("#000000"); //Default color is black
+  const [lineWeight, setLineWeight] = useState<number>(1.0); //Default color is 1.0
 
   useEffect(() => {
     const resizeCanvas = async () => {
@@ -23,9 +24,15 @@ const Draw = () => {
       const ctx: CanvasRenderingContext2D = canvas.getContext(
         "2d"
       ) as CanvasRenderingContext2D;
+      // set lineColor
       if (sessionStorage.getItem("lineColor")) {
         ctx.strokeStyle = sessionStorage.getItem("lineColor") as string;
         setLineColor(sessionStorage.getItem("lineColor") as string);
+      }
+      // set lineWeight
+      if(sessionStorage.getItem("lineWeight")) { 
+        ctx.lineWidth = parseInt(sessionStorage.getItem("lineWeight") as string) as number;
+        setLineWeight(parseInt(sessionStorage.getItem("lineWeight") as string) as number);
       }
 
       drawingData.current = ctx as CanvasRenderingContext2D;
@@ -85,16 +92,20 @@ const Draw = () => {
     drawingData.current.stroke();
   };
 
-  const changeLineColor = (
-    e:
-      | React.ChangeEvent<HTMLInputElement>
-      | React.ChangeEvent<HTMLSelectElement>
-  ) => {
+  const changeLineColor = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!drawingData.current) return;
     setLineColor(e.target.value);
     // store data in session storage
-    sessionStorage.setItem('lineColor',e.target.value);
+    sessionStorage.setItem("lineColor", e.target.value);
     drawingData.current.strokeStyle = e.target.value as string;
+  };
+
+  const changeLineWeight = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!drawingData.current) return;
+    setLineWeight(parseInt(e.target.value) as number);
+    // store data in session storage
+    sessionStorage.setItem("lineWeight", e.target.value);
+    drawingData.current.lineWidth = parseInt(e.target.value) as number;
   };
 
   return (
@@ -125,12 +136,7 @@ const Draw = () => {
           </div>
           <div id="lineWeight">
             <span>Change weight for line</span>
-            <select>
-              <option value="volvo">Volvo</option>
-              <option value="saab">Saab</option>
-              <option value="mercedes">Mercedes</option>
-              <option value="audi">Audi</option>
-            </select>
+           <input type="range" value={lineWeight} className="lineWeightPicker" onChange={(e) => { changeLineWeight(e) }} min="1" max="10"/>
           </div>
         </section>
       </div>
