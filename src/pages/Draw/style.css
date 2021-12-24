@@ -1,0 +1,39 @@
+/* default */
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+
+/* height */
+
+.h-100 {
+    height: 100%;
+}
+
+
+/* flex box  */
+
+.d-flex {
+    display: flex;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.flex-column {
+    flex-direction: column;
+}
+
+
+/* margin */
+
+.mt-2 {
+    margin-top: 2em;
+}
