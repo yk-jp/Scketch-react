@@ -1,9 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
+
 // css
 import "./style.css";
-// module
-import { jsPDF } from "jspdf";
-import { v4 as uuidv4 } from "uuid";
 
 const Draw = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -12,6 +10,7 @@ const Draw = () => {
 
   const [lineColor, setLineColor] = useState<string>("#000000"); //Default color is black
   const [lineWeight, setLineWeight] = useState<number>(1.0); //Default color is 1.0
+  // const [globalCompositeOperation,setGlobalCompositeOperation] = useState<string>();
 
   useEffect(() => {
     const resizeCanvas = async () => {
@@ -132,26 +131,7 @@ const Draw = () => {
   };
   const changePencil = () => {
     if (!drawingData.current || !canvasRef.current) return;
-    drawingData.current.globalCompositeOperation = "source-over";
-  };
-
-  const downloadPDF = () => {
-    if (!drawingData.current || !canvasRef.current) return;
-    const dataURI: string = canvasRef.current.toDataURL();
-    const doc = new jsPDF("l", "px", [
-      canvasRef.current.width,
-      canvasRef.current.height,
-    ]);
-
-    doc.addImage(
-      dataURI,
-      "JPEG",
-      0,0,
-      canvasRef.current.width,
-      canvasRef.current.height
-    );
-
-    doc.save(`${uuidv4()}.pdf`);
+    drawingData.current.globalCompositeOperation = 'source-over';
   };
 
   return (
@@ -201,9 +181,6 @@ const Draw = () => {
           </div>
           <div id="clearCanvas">
             <button onClick={() => clearDrawing()}>clear</button>
-          </div>
-          <div id="generatePDF">
-            <button onClick={() => downloadPDF()}>download pdf</button>
           </div>
         </section>
       </div>
