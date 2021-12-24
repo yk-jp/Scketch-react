@@ -10,6 +10,7 @@ const Draw = () => {
 
   const [lineColor, setLineColor] = useState<string>("#000000"); //Default color is black
   const [lineWeight, setLineWeight] = useState<number>(1.0); //Default color is 1.0
+  // const [globalCompositeOperation,setGlobalCompositeOperation] = useState<string>();
 
   useEffect(() => {
     const resizeCanvas = async () => {
@@ -19,12 +20,13 @@ const Draw = () => {
     };
     const initializeCanvas = async () => {
       const canvas: HTMLCanvasElement = canvasRef.current as HTMLCanvasElement;
-      
+
       resizeCanvas(); //get canvas size
 
       const ctx: CanvasRenderingContext2D = canvas.getContext(
         "2d"
       ) as CanvasRenderingContext2D;
+      // setGlobalCompositeOperation(ctx.globalCompositeOperation);
       // set lineColor
       if (sessionStorage.getItem("lineColor")) {
         ctx.strokeStyle = sessionStorage.getItem("lineColor") as string;
@@ -115,7 +117,21 @@ const Draw = () => {
 
   const clearDrawing = () => {
     if (!drawingData.current || !canvasRef.current) return;
-    drawingData.current.clearRect(0,0,canvasRef.current.width,canvasRef.current.height);
+    drawingData.current.clearRect(
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+  };
+
+  const changeEraser = () => {
+    if (!drawingData.current || !canvasRef.current) return;
+    drawingData.current.globalCompositeOperation = "destination-out";
+  };
+  const changePencil = () => {
+    if (!drawingData.current || !canvasRef.current) return;
+    drawingData.current.globalCompositeOperation = 'source-over';
   };
 
   return (
@@ -144,6 +160,12 @@ const Draw = () => {
               }}
             />
           </div>
+          <div id="pencil">
+            <button onClick={() => changePencil()}>pencil</button>
+          </div>
+          <div id="eraser">
+            <button onClick={() => changeEraser()}>eraser</button>
+          </div>
           <div id="lineWeight">
             <span>Change weight for line</span>
             <input
@@ -154,7 +176,7 @@ const Draw = () => {
                 changeLineWeight(e);
               }}
               min="1"
-              max="10"
+              max="15"
             />
           </div>
           <div id="clearCanvas">
