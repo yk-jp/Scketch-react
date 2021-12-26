@@ -163,6 +163,7 @@ const Draw = () => {
             id="drawingArea"
             ref={canvasRef}
             style={{ border: "1px solid black" }}
+            className="canvasScrollNone"
             onPointerDown={(e) => startDrawing(e)}
             onPointerUp={() => endDrawing()}
             onPointerMove={(e) => drawing(e)}
