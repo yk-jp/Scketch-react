@@ -37,3 +37,11 @@
 .mt-2 {
     margin-top: 2em;
 }
+
+
+/* canvas */
+
+.canvasScrollNone {
+    touch-action: none;
+    -webkit-user-drag: none;
+}
