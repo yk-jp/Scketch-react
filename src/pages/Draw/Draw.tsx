@@ -13,6 +13,20 @@ const Draw = () => {
   const [lineColor, setLineColor] = useState<string>("#000000"); //Default color is black
   const [lineWeight, setLineWeight] = useState<number>(1.0); //Default color is 1.0
 
+  // const rerenderingDrawingData =
+  // useCallback((): CanvasRenderingContext2D | null => {
+  //     if (!drawingData.current) return null;
+  //     if (sessionStorage.getItem("currentDrawing")) {
+  //       const tempDataForDrawing: CanvasImageSource = new Image();
+  //       tempDataForDrawing.src = sessionStorage.getItem(
+  //         "currentDrawing"
+  //       ) as string;
+  //       drawingData.current.drawImage(tempDataForDrawing, 0, 0);
+  //     }
+
+  //     return drawingData.current;
+  //   }, [drawingData]);
+
   useEffect(() => {
     const resizeCanvas = async () => {
       if (!canvasRef.current) return;
@@ -42,8 +56,15 @@ const Draw = () => {
           parseInt(sessionStorage.getItem("lineWeight") as string) as number
         );
       }
-
       drawingData.current = ctx as CanvasRenderingContext2D;
+      
+    if (sessionStorage.getItem("currentDrawing")) {
+      const tempDataForDrawing: CanvasImageSource = new Image();
+      tempDataForDrawing.src = sessionStorage.getItem(
+        "currentDrawing"
+      ) as string;
+      drawingData.current.drawImage(tempDataForDrawing, 0, 0);
+    }
     };
 
     initializeCanvas();
@@ -79,10 +100,17 @@ const Draw = () => {
   };
 
   const endDrawing = () => {
-    if (!drawingData.current) return;
+    if (!drawingData.current || !canvasRef.current) return;
 
     drawingData.current.closePath();
     setIsPointerDown(false);
+
+    // store data to session storage
+    const dataURI: string = canvasRef.current.toDataURL();
+    sessionStorage.setItem("currentDrawing", dataURI);
+    const tempDataForDrawing: CanvasImageSource = new Image();
+    tempDataForDrawing.src = dataURI;
+    drawingData.current.drawImage(tempDataForDrawing, 0, 0);
   };
 
   const drawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
