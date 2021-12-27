@@ -13,14 +13,6 @@ const Draw = () => {
   const [lineColor, setLineColor] = useState<string>("#000000"); //Default color is black
   const [lineWeight, setLineWeight] = useState<number>(1.0); //Default color is 1.0
 
-  // data from session storage
-  const currentDrawingFromStorage: string | null =
-    sessionStorage.getItem("currentDrawing");
-  const lineColorFromStorage: string | null =
-    sessionStorage.getItem("lineColor");
-  const lineWeightFromStorage: string | null =
-    sessionStorage.getItem("lineWeight");
-
   useEffect(() => {
     const resizeCanvas = async () => {
       if (!canvasRef.current) return;
@@ -36,20 +28,7 @@ const Draw = () => {
         "2d"
       ) as CanvasRenderingContext2D;
 
-      // set lineColor
-      if (lineColorFromStorage) {
-        ctx.strokeStyle = lineColorFromStorage;
-        setLineColor(lineColorFromStorage);
-      }
-      // set lineWeight
-      if (lineWeightFromStorage) {
-        const lineWeight: number = parseInt(lineWeightFromStorage) as number;
-        ctx.lineWidth = lineWeight;
-        setLineWeight(lineWeight);
-      }
       drawingData.current = ctx as CanvasRenderingContext2D;
-
-      if (currentDrawingFromStorage) updateDrawing(currentDrawingFromStorage);
     };
 
     initializeCanvas();
@@ -64,7 +43,7 @@ const Draw = () => {
         initializeCanvas();
       });
     };
-  }, [currentDrawingFromStorage, lineColorFromStorage, lineWeightFromStorage]);
+  }, []);
 
   const updateDrawing = (dataURI: string) => {
     if (!drawingData.current) return;
@@ -99,7 +78,6 @@ const Draw = () => {
 
     // store data to session storage
     const dataURI: string = canvasRef.current.toDataURL();
-    sessionStorage.setItem("currentDrawing", dataURI);
     updateDrawing(dataURI);
   };
 
@@ -119,17 +97,16 @@ const Draw = () => {
   };
 
   const changeLineColor = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!drawingData.current) return;
+    if (!drawingData.current || !canvasRef.current) return;
     const newLineColor: string = e.target.value;
     setLineColor(newLineColor);
     // store data in session storage
-    sessionStorage.setItem("lineColor", newLineColor);
     drawingData.current.strokeStyle = newLineColor;
   };
 
   const changeLineWeight = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!drawingData.current) return;
-    sessionStorage.setItem("lineWeight", e.target.value); // store data in session storage
+    if (!drawingData.current || !canvasRef.current) return;
+   
     const lineWeight: number = parseInt(e.target.value);
     setLineWeight(lineWeight);
     drawingData.current.lineWidth = lineWeight;
