@@ -1,7 +1,9 @@
 import React, { useRef, useEffect, useState } from "react";
-
 // css
 import "./style.css";
+// module
+import { jsPDF } from "jspdf";
+import { v4 as uuidv4 } from "uuid";
 
 const Draw = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -10,7 +12,6 @@ const Draw = () => {
 
   const [lineColor, setLineColor] = useState<string>("#000000"); //Default color is black
   const [lineWeight, setLineWeight] = useState<number>(1.0); //Default color is 1.0
-  // const [globalCompositeOperation,setGlobalCompositeOperation] = useState<string>();
 
   useEffect(() => {
     const resizeCanvas = async () => {
@@ -26,21 +27,6 @@ const Draw = () => {
       const ctx: CanvasRenderingContext2D = canvas.getContext(
         "2d"
       ) as CanvasRenderingContext2D;
-      // setGlobalCompositeOperation(ctx.globalCompositeOperation);
-      // set lineColor
-      if (sessionStorage.getItem("lineColor")) {
-        ctx.strokeStyle = sessionStorage.getItem("lineColor") as string;
-        setLineColor(sessionStorage.getItem("lineColor") as string);
-      }
-      // set lineWeight
-      if (sessionStorage.getItem("lineWeight")) {
-        ctx.lineWidth = parseInt(
-          sessionStorage.getItem("lineWeight") as string
-        ) as number;
-        setLineWeight(
-          parseInt(sessionStorage.getItem("lineWeight") as string) as number
-        );
-      }
 
       drawingData.current = ctx as CanvasRenderingContext2D;
     };
@@ -58,6 +44,13 @@ const Draw = () => {
       });
     };
   }, []);
+
+  const updateDrawing = (dataURI: string) => {
+    if (!drawingData.current) return;
+    const tempDataForDrawing: CanvasImageSource = new Image();
+    tempDataForDrawing.src = dataURI;
+    drawingData.current.drawImage(tempDataForDrawing, 0, 0);
+  };
 
   const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!drawingData.current) return;
@@ -78,10 +71,14 @@ const Draw = () => {
   };
 
   const endDrawing = () => {
-    if (!drawingData.current) return;
+    if (!drawingData.current || !canvasRef.current) return;
 
     drawingData.current.closePath();
     setIsPointerDown(false);
+
+    // store data to session storage
+    const dataURI: string = canvasRef.current.toDataURL();
+    updateDrawing(dataURI);
   };
 
   const drawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -100,19 +97,19 @@ const Draw = () => {
   };
 
   const changeLineColor = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!drawingData.current) return;
-    setLineColor(e.target.value);
+    if (!drawingData.current || !canvasRef.current) return;
+    const newLineColor: string = e.target.value;
+    setLineColor(newLineColor);
     // store data in session storage
-    sessionStorage.setItem("lineColor", e.target.value);
-    drawingData.current.strokeStyle = e.target.value as string;
+    drawingData.current.strokeStyle = newLineColor;
   };
 
   const changeLineWeight = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!drawingData.current) return;
-    setLineWeight(parseInt(e.target.value) as number);
-    // store data in session storage
-    sessionStorage.setItem("lineWeight", e.target.value);
-    drawingData.current.lineWidth = parseInt(e.target.value) as number;
+    if (!drawingData.current || !canvasRef.current) return;
+   
+    const lineWeight: number = parseInt(e.target.value);
+    setLineWeight(lineWeight);
+    drawingData.current.lineWidth = lineWeight;
   };
 
   const clearDrawing = () => {
@@ -131,7 +128,27 @@ const Draw = () => {
   };
   const changePencil = () => {
     if (!drawingData.current || !canvasRef.current) return;
-    drawingData.current.globalCompositeOperation = 'source-over';
+    drawingData.current.globalCompositeOperation = "source-over";
+  };
+
+  const downloadPDF = () => {
+    if (!drawingData.current || !canvasRef.current) return;
+    const dataURI: string = canvasRef.current.toDataURL();
+    const doc = new jsPDF("l", "px", [
+      canvasRef.current.width,
+      canvasRef.current.height,
+    ]);
+
+    doc.addImage(
+      dataURI,
+      "JPEG",
+      0,
+      0,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+
+    doc.save(`${uuidv4()}.pdf`);
   };
 
   return (
@@ -142,6 +159,7 @@ const Draw = () => {
             id="drawingArea"
             ref={canvasRef}
             style={{ border: "1px solid black" }}
+            className="canvasScrollNone"
             onPointerDown={(e) => startDrawing(e)}
             onPointerUp={() => endDrawing()}
             onPointerMove={(e) => drawing(e)}
@@ -181,6 +199,9 @@ const Draw = () => {
           </div>
           <div id="clearCanvas">
             <button onClick={() => clearDrawing()}>clear</button>
+          </div>
+          <div id="generatePDF">
+            <button onClick={() => downloadPDF()}>download pdf</button>
           </div>
         </section>
       </div>
