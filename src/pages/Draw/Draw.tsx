@@ -45,6 +45,23 @@ const Draw = () => {
     };
   }, []);
 
+  const returnBaseCoordinate = (): { [key: string]: number } => {
+    const baseCoordinateX: number = canvasRef.current?.getBoundingClientRect()
+      .left as number;
+    const baseCoordinateY: number = canvasRef.current?.getBoundingClientRect()
+      .top as number;
+    return { baseCoordinateX, baseCoordinateY };
+  };
+
+  const isOutOfCanvas = (x: number, y: number): boolean => {
+    const { baseCoordinateX, baseCoordinateY } = returnBaseCoordinate();
+  
+    if (x < baseCoordinateX || x > baseCoordinateX + canvasRef.current.width ) return true;
+    if (y < baseCoordinateY || y > baseCoordinateY + canvasRef.current.height ) return true;
+     
+    return false;
+  };
+
   const updateDrawing = (dataURI: string) => {
     if (!drawingData.current) return;
     const tempDataForDrawing: CanvasImageSource = new Image();
@@ -54,11 +71,7 @@ const Draw = () => {
 
   const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!drawingData.current) return;
-
-    const baseCoordinateX: number = canvasRef.current?.getBoundingClientRect()
-      .left as number;
-    const baseCoordinateY: number = canvasRef.current?.getBoundingClientRect()
-      .top as number;
+    const { baseCoordinateX, baseCoordinateY } = returnBaseCoordinate();
     const coordinateX: number = e.clientX;
     const coordinateY: number = e.clientY;
     // start drawing
@@ -68,12 +81,13 @@ const Draw = () => {
       coordinateY - baseCoordinateY
     );
     setIsPointerDown(true);
+
   };
 
   const endDrawing = () => {
     if (!drawingData.current || !canvasRef.current) return;
-
     drawingData.current.closePath();
+
     setIsPointerDown(false);
 
     // store data to session storage
@@ -83,17 +97,21 @@ const Draw = () => {
 
   const drawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isPointerDown || !drawingData.current) return;
-    const baseCoordinateX: number = canvasRef.current?.getBoundingClientRect()
-      .left as number;
-    const baseCoordinateY: number = canvasRef.current?.getBoundingClientRect()
-      .top as number;
+    const { baseCoordinateX, baseCoordinateY } = returnBaseCoordinate();
     const coordinateX: number = e.clientX;
     const coordinateY: number = e.clientY;
+
     drawingData.current.lineTo(
       coordinateX - baseCoordinateX,
       coordinateY - baseCoordinateY
     );
+
     drawingData.current.stroke();
+
+    if (isOutOfCanvas(coordinateX, coordinateY)) {
+      endDrawing();
+    }
+   
   };
 
   const changeLineColor = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,7 +124,7 @@ const Draw = () => {
 
   const changeLineWeight = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!drawingData.current || !canvasRef.current) return;
-   
+
     const lineWeight: number = parseInt(e.target.value);
     setLineWeight(lineWeight);
     drawingData.current.lineWidth = lineWeight;
@@ -124,9 +142,9 @@ const Draw = () => {
 
   const changeEraser = () => {
     if (!drawingData.current || !canvasRef.current) return;
-    drawingData.current.strokeStyle = '#FFFFFF';
+    drawingData.current.strokeStyle = "#FFFFFF";
   };
-  
+
   const changePencil = () => {
     if (!drawingData.current || !canvasRef.current) return;
     drawingData.current.strokeStyle = lineColor;
@@ -161,8 +179,8 @@ const Draw = () => {
             ref={canvasRef}
             style={{ border: "1px solid black" }}
             className="canvasScrollNone"
+            onPointerOver={() => endDrawing()}
             onPointerDown={(e) => startDrawing(e)}
-            onPointerUp={() => endDrawing()}
             onPointerMove={(e) => drawing(e)}
           ></canvas>
         </main>
