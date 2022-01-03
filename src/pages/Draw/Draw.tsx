@@ -142,9 +142,10 @@ const Draw = () => {
 
   const changeEraser = () => {
     if (!drawingData.current || !canvasRef.current) return;
-    drawingData.current.strokeStyle = "#FFFFFF";
+    drawingData.current.strokeStyle = '#FFFFFF';
   };
-
+  
+>>>>>>> af8ab0cf586f10e2bdcf5a6d0bd3aaf3abc6ef26
   const changePencil = () => {
     if (!drawingData.current || !canvasRef.current) return;
     drawingData.current.strokeStyle = lineColor;
