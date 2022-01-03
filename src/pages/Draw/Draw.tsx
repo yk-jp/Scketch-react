@@ -124,11 +124,12 @@ const Draw = () => {
 
   const changeEraser = () => {
     if (!drawingData.current || !canvasRef.current) return;
-    drawingData.current.globalCompositeOperation = "destination-out";
+    drawingData.current.strokeStyle = '#FFFFFF';
   };
+  
   const changePencil = () => {
     if (!drawingData.current || !canvasRef.current) return;
-    drawingData.current.globalCompositeOperation = "source-over";
+    drawingData.current.strokeStyle = lineColor;
   };
 
   const downloadPDF = () => {
