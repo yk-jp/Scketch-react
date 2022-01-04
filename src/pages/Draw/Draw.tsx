@@ -73,8 +73,6 @@ const Draw = () => {
   };
 
   const getImageString = () => {
-    // const { baseCoordinateX, baseCoordinateY } = returnBaseCoordinate();
-
     return drawingData.current.getImageData(
       0,
       0,
@@ -88,11 +86,6 @@ const Draw = () => {
     const imgData: ImageData = getImageString();
     drawingHistory.current.insertAtTheBeginning(imgData);
   }
-
-  // const revertToDrawings = (imgData: ImageData): void => {
-  //   const { baseCoordinateX, baseCoordinateY } = returnBaseCoordinate();
-  //   drawingData.current.putImageData(imgData, baseCoordinateX, baseCoordinateY);
-  // };
 
   const updateDrawing = (dataURI: string) => {
     if (!drawingData.current) return;
@@ -210,7 +203,11 @@ const Draw = () => {
     drawingData.current.putImageData(prevDrawings.getData(),0,0);
   };
 
-  // const redo = () => {};
+  const redo = () => {
+    drawingHistory.current.goBackToPrevNode();
+    const drawingsAheadOFcurrent:Node<ImageData> = drawingHistory.current.getHead();
+    drawingData.current.putImageData(drawingsAheadOFcurrent.getData(),0,0);
+  };
 
   return (
     <div id="drawContainer">
@@ -266,9 +263,9 @@ const Draw = () => {
               </button>
             </div>
             <div id="redo">
-              {/* <button id="redo" onClick={() => redo()}> */}
-              {/* redo
-              </button>u */}
+              <button id="redo" onClick={() => redo()}>
+               redo
+              </button>
             </div>
           </div>
           <div id="clearCanvas">
