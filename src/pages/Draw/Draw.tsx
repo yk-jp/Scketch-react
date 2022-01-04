@@ -182,6 +182,7 @@ const Draw = () => {
             onPointerOver={() => endDrawing()}
             onPointerDown={(e) => startDrawing(e)}
             onPointerMove={(e) => drawing(e)}
+            onPointerUp = {() => endDrawing()}
           ></canvas>
         </main>
 
