@@ -4,10 +4,15 @@ import "./style.css";
 // module
 import { jsPDF } from "jspdf";
 import { v4 as uuidv4 } from "uuid";
+// custom module
+import DoublyLinkedList, { Node } from "../../utils/SinglyLinkedList";
 
 const Draw = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const drawingData = useRef<CanvasRenderingContext2D | null>(null);
+  const drawingHistory = useRef<DoublyLinkedList<ImageData>>(
+    new DoublyLinkedList()
+  );
   const [isPointerDown, setIsPointerDown] = useState<boolean>(false);
 
   const [lineColor, setLineColor] = useState<string>("#000000"); //Default color is black
@@ -55,12 +60,30 @@ const Draw = () => {
 
   const isOutOfCanvas = (x: number, y: number): boolean => {
     const { baseCoordinateX, baseCoordinateY } = returnBaseCoordinate();
-  
-    if (x < baseCoordinateX || x > baseCoordinateX + canvasRef.current.width ) return true;
-    if (y < baseCoordinateY || y > baseCoordinateY + canvasRef.current.height ) return true;
-     
+
+    if (x < baseCoordinateX || x > baseCoordinateX + canvasRef.current.width)
+      return true;
+    if (y < baseCoordinateY || y > baseCoordinateY + canvasRef.current.height)
+      return true;
+
     return false;
   };
+
+  const getImageString = () => {
+    const { baseCoordinateX, baseCoordinateY } = returnBaseCoordinate();
+
+    return drawingData.current.getImageData(
+      baseCoordinateX,
+      baseCoordinateY,
+      canvasRef.current.width,
+      canvasRef.current.height
+    );
+  };
+
+  // const revertToDrawings = (imgData: ImageData): void => {
+  //   const { baseCoordinateX, baseCoordinateY } = returnBaseCoordinate();
+  //   drawingData.current.putImageData(imgData, baseCoordinateX, baseCoordinateY);
+  // };
 
   const updateDrawing = (dataURI: string) => {
     if (!drawingData.current) return;
@@ -81,7 +104,6 @@ const Draw = () => {
       coordinateY - baseCoordinateY
     );
     setIsPointerDown(true);
-
   };
 
   const endDrawing = () => {
@@ -93,6 +115,10 @@ const Draw = () => {
     // store data to session storage
     const dataURI: string = canvasRef.current.toDataURL();
     updateDrawing(dataURI);
+
+    // store data to linked list for undoing and redoing.
+    const imgData: ImageData = getImageString();
+    drawingHistory.current.insertAtTheBeginning(imgData);
   };
 
   const drawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -111,7 +137,6 @@ const Draw = () => {
     if (isOutOfCanvas(coordinateX, coordinateY)) {
       endDrawing();
     }
-   
   };
 
   const changeLineColor = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,7 +167,7 @@ const Draw = () => {
 
   const changeEraser = () => {
     if (!drawingData.current || !canvasRef.current) return;
-    drawingData.current.strokeStyle = '#FFFFFF';
+    drawingData.current.strokeStyle = "#FFFFFF";
   };
 
   const changePencil = () => {
@@ -169,6 +194,14 @@ const Draw = () => {
 
     doc.save(`${uuidv4()}.pdf`);
   };
+
+  const undo = () => {
+    drawingHistory.current.goBackToPrevNode();
+    const prevDrawings:Node<ImageData> = drawingHistory.current.getHead();
+    drawingData.current.putImageData(prevDrawings.getData(),0, 0);
+  };
+
+  // const redo = () => {};
 
   return (
     <div id="drawContainer">
@@ -216,6 +249,18 @@ const Draw = () => {
               min="1"
               max="15"
             />
+          </div>
+          <div id="undo_redo">
+            <div id="undo">
+              <button id="" onClick={() => undo()}>
+                undo
+              </button>
+            </div>
+            <div id="redo">
+              {/* <button id="redo" onClick={() => redo()}> */}
+              {/* redo
+              </button>u */}
+            </div>
           </div>
           <div id="clearCanvas">
             <button onClick={() => clearDrawing()}>clear</button>
