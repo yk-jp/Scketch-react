@@ -5,7 +5,7 @@ import "./style.css";
 import { jsPDF } from "jspdf";
 import { v4 as uuidv4 } from "uuid";
 // custom module
-import DoublyLinkedList, { Node } from "../../utils/SinglyLinkedList";
+import DoublyLinkedList, { Node } from "../../utils/DoublyLinkedList";
 
 const Draw = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -27,13 +27,16 @@ const Draw = () => {
     const initializeCanvas = async () => {
       const canvas: HTMLCanvasElement = canvasRef.current as HTMLCanvasElement;
 
-      resizeCanvas(); //get canvas size
+      resizeCanvas(); //get canvas sizeuuu
 
       const ctx: CanvasRenderingContext2D = canvas.getContext(
         "2d"
       ) as CanvasRenderingContext2D;
 
       drawingData.current = ctx as CanvasRenderingContext2D;
+
+      // initialize drawing history
+      storeDrawingHistory();
     };
 
     initializeCanvas();
@@ -70,15 +73,21 @@ const Draw = () => {
   };
 
   const getImageString = () => {
-    const { baseCoordinateX, baseCoordinateY } = returnBaseCoordinate();
+    // const { baseCoordinateX, baseCoordinateY } = returnBaseCoordinate();
 
     return drawingData.current.getImageData(
-      baseCoordinateX,
-      baseCoordinateY,
+      0,
+      0,
       canvasRef.current.width,
       canvasRef.current.height
     );
   };
+
+  const storeDrawingHistory = () => { 
+    // store data to linked list for undoing and redoing.
+    const imgData: ImageData = getImageString();
+    drawingHistory.current.insertAtTheBeginning(imgData);
+  }
 
   // const revertToDrawings = (imgData: ImageData): void => {
   //   const { baseCoordinateX, baseCoordinateY } = returnBaseCoordinate();
@@ -107,7 +116,7 @@ const Draw = () => {
   };
 
   const endDrawing = () => {
-    if (!drawingData.current || !canvasRef.current) return;
+    if (!drawingData.current || !canvasRef.current || !isPointerDown) return;
     drawingData.current.closePath();
 
     setIsPointerDown(false);
@@ -117,9 +126,9 @@ const Draw = () => {
     updateDrawing(dataURI);
 
     // store data to linked list for undoing and redoing.
-    const imgData: ImageData = getImageString();
-    drawingHistory.current.insertAtTheBeginning(imgData);
+     storeDrawingHistory();  
   };
+
 
   const drawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isPointerDown || !drawingData.current) return;
@@ -196,9 +205,9 @@ const Draw = () => {
   };
 
   const undo = () => {
-    drawingHistory.current.goBackToPrevNode();
+    drawingHistory.current.moveToNextNode();
     const prevDrawings:Node<ImageData> = drawingHistory.current.getHead();
-    drawingData.current.putImageData(prevDrawings.getData(),0, 0);
+    drawingData.current.putImageData(prevDrawings.getData(),0,0);
   };
 
   // const redo = () => {};
