@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 // css
 import "./style.css";
+
 // module
 import { jsPDF } from "jspdf";
 import { v4 as uuidv4 } from "uuid";
@@ -9,6 +10,7 @@ import DoublyLinkedList, { Node } from "../../utils/DoublyLinkedList";
 
 const Draw = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const canvasParentRef = useRef<HTMLDivElement | null>(null);
   const drawingData = useRef<CanvasRenderingContext2D | null>(null);
   const drawingHistory = useRef<DoublyLinkedList<ImageData>>(
     new DoublyLinkedList()
@@ -19,15 +21,11 @@ const Draw = () => {
   const [lineWeight, setLineWeight] = useState<number>(1.0); //Default color is 1.0
 
   useEffect(() => {
-    const resizeCanvas = async () => {
-      if (!canvasRef.current) return;
-      canvasRef.current.width = window.innerWidth / 2;
-      canvasRef.current.height = window.innerHeight / 2;
-    };
     const initializeCanvas = async () => {
       const canvas: HTMLCanvasElement = canvasRef.current as HTMLCanvasElement;
-
-      resizeCanvas(); //get canvas sizeuuu
+      // size
+      canvas.width = canvasParentRef.current.clientWidth;
+      canvas.height = canvasParentRef.current.clientHeight;
 
       const ctx: CanvasRenderingContext2D = canvas.getContext(
         "2d"
@@ -40,17 +38,6 @@ const Draw = () => {
     };
 
     initializeCanvas();
-
-    window.addEventListener("resize", () => {
-      initializeCanvas();
-    });
-
-    return () => {
-      // clean up
-      window.removeEventListener("resize", () => {
-        initializeCanvas();
-      });
-    };
   }, []);
 
   const returnBaseCoordinate = (): { [key: string]: number } => {
@@ -81,11 +68,11 @@ const Draw = () => {
     );
   };
 
-  const storeDrawingHistory = () => { 
+  const storeDrawingHistory = () => {
     // store data to linked list for undoing and redoing.
     const imgData: ImageData = getImageString();
     drawingHistory.current.insertAtTheBeginning(imgData);
-  }
+  };
 
   const updateDrawing = (dataURI: string) => {
     if (!drawingData.current) return;
@@ -119,7 +106,7 @@ const Draw = () => {
     updateDrawing(dataURI);
 
     // store data to linked list for undoing and redoing.
-     storeDrawingHistory();  
+    storeDrawingHistory();
   };
 
 
@@ -199,20 +186,27 @@ const Draw = () => {
 
   const undo = () => {
     drawingHistory.current.moveToNextNode();
-    const prevDrawings:Node<ImageData> = drawingHistory.current.getHead();
-    drawingData.current.putImageData(prevDrawings.getData(),0,0);
+    const prevDrawings: Node<ImageData> = drawingHistory.current.getHead();
+    drawingData.current.putImageData(prevDrawings.getData(), 0, 0);
+
   };
 
   const redo = () => {
     drawingHistory.current.goBackToPrevNode();
-    const drawingsAheadOFcurrent:Node<ImageData> = drawingHistory.current.getHead();
-    drawingData.current.putImageData(drawingsAheadOFcurrent.getData(),0,0);
+    const drawingsAheadOFcurrent: Node<ImageData> =
+      drawingHistory.current.getHead();
+    drawingData.current.putImageData(drawingsAheadOFcurrent.getData(), 0, 0);
+
   };
 
   return (
     <div id="drawContainer">
-      <div className="h-100 d-flex justify-content-center align-items-center flex-column">
-        <main id="canvasSec">
+      <div className="h-100">
+        <div
+          id="canvasSec"
+          ref={canvasParentRef}
+          className=" px-5 mt-3 w-90 h-75 d-flex justify-content-center m-auto"
+        >
           <canvas
             id="drawingArea"
             ref={canvasRef}
@@ -222,29 +216,26 @@ const Draw = () => {
             onPointerDown={(e) => startDrawing(e)}
             onPointerMove={(e) => drawing(e)}
             onPointerUp = {() => endDrawing()}
-          ></canvas>
-        </main>
 
-        <section id="ToolsForDrawing" className="mt-2">
+          ></canvas>
+        </div>
+
+        <div
+          id="ToolsForDrawing"
+          className="mt-2 w-100 d-flex justify-content-center"
+        >
+
           <div id="lineColor">
-            <span>Change color for line</span>
             <input
               type="color"
-              className="colorPicker"
+              className="lineColor"
               value={lineColor}
               onChange={(e) => {
                 changeLineColor(e);
               }}
             />
           </div>
-          <div id="pencil">
-            <button onClick={() => changePencil()}>pencil</button>
-          </div>
-          <div id="eraser">
-            <button onClick={() => changeEraser()}>eraser</button>
-          </div>
           <div id="lineWeight">
-            <span>Change weight for line</span>
             <input
               type="range"
               value={lineWeight}
@@ -256,25 +247,34 @@ const Draw = () => {
               max="15"
             />
           </div>
-          <div id="undo_redo">
-            <div id="undo">
+          <div className="d-flex">
+            <div id="pencil">
+              <button onClick={() => changePencil()}>pencil</button>
+            </div>
+            <div id="eraser">
+              <button onClick={() => changeEraser()}>eraser</button>
+            </div>
+          </div>
+         
+          <div id="undo_redo" className="d-flex mx-1">
+            <div id="undo" className="mx-1">
               <button id="" onClick={() => undo()}>
                 undo
               </button>
             </div>
-            <div id="redo">
+            <div id="redo" className="mx-1">
               <button id="redo" onClick={() => redo()}>
-               redo
+                redo
               </button>
             </div>
-          </div>
-          <div id="clearCanvas">
-            <button onClick={() => clearDrawing()}>clear</button>
+            <div id="clearCanvas">
+              <button onClick={() => clearDrawing()}>clear</button>
+            </div>
           </div>
           <div id="generatePDF">
             <button onClick={() => downloadPDF()}>download pdf</button>
           </div>
-        </section>
+        </div>
       </div>
     </div>
   );
